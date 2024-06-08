@@ -130,6 +130,6 @@ For RAG, we are using Langchain, Couchbase Vector Search, NVidia NIM & Meta LLam
   }
   ```
 
-- #### Run the application
+- #### Run the application with streamlit
 
   `streamlit run chat_with_pdf.py`

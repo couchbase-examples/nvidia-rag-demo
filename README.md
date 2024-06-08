@@ -1,6 +1,6 @@
-## RAG Demo using Couchbase, Streamlit, Langchain, and OpenAI
+## RAG Demo using Couchbase, Nvidia NIM, Meta LLama3, Langchain and Streamlit
 
-This is a demo app built to chat with your custom PDFs using the vector search capabilities of Couchbase to augment the OpenAI results in a Retrieval-Augmented-Generation (RAG) model.
+This is a demo app built to chat with your custom PDFs using the vector search capabilities of Couchbase to augment the LLama 3 results in a Retrieval-Augmented-Generation (RAG) model, powered by Nvidia NIM.
 
 ### How does it work?
 
@@ -9,9 +9,9 @@ You can upload your PDFs with custom data & ask questions about the data in the 
 For each question, you will get two answers:
 
 - one using RAG (Couchbase logo)
-- one using pure LLM - OpenAI (🤖).
+- one using pure LLM - LLama 3 (🤖).
 
-For RAG, we are using Langchain, Couchbase Vector Search & OpenAI. We fetch parts of the PDF relevant to the question using Vector search & add it as the context to the LLM. The LLM is instructed to answer based on the context from the Vector Store.
+For RAG, we are using Langchain, Couchbase Vector Search, NVidia NIM & Meta LLama3. We fetch parts of the PDF relevant to the question using Vector search & add it as the context to the LLM. The LLM is instructed to answer based on the context from the Vector Store.
 
 ### How to Run
 
@@ -24,7 +24,7 @@ For RAG, we are using Langchain, Couchbase Vector Search & OpenAI. We fetch part
   Copy the `secrets.example.toml` file in `.streamlit` folder and rename it to `secrets.toml` and replace the placeholders with the actual values for your environment
 
   ```
-  OPENAI_API_KEY = "<open_ai_api_key>"
+  NVIDIA_API_KEY = "<nvidia_nim_api_key>"
   DB_CONN_STR = "<connection_string_for_couchbase_cluster>"
   DB_USERNAME = "<username_for_couchbase_cluster>"
   DB_PASSWORD = "<password_for_couchbase_cluster>"

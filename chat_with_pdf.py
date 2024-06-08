@@ -125,10 +125,10 @@ if __name__ == "__main__":
         check_environment_variable("DB_COLLECTION")
         check_environment_variable("INDEX_NAME")
 
-        # Use snowflake's arctic embeddings model from NVIDIA Embeddings
+        # Use Nvidia's embeddings model
         embedding = NVIDIAEmbeddings(
             nvidia_api_key=os.getenv("NVIDIA_API_KEY"),
-            model="snowflake/arctic-embed-l")
+            model="NV-Embed-QA")
 
         # Connect to Couchbase Vector Store
         cluster = connect_to_couchbase(DB_CONN_STR, DB_USERNAME, DB_PASSWORD)

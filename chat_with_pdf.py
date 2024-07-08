@@ -1,5 +1,5 @@
 import tempfile
-from langchain_community.vectorstores import CouchbaseVectorStore
+from langchain_couchbase import CouchbaseVectorStore
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os

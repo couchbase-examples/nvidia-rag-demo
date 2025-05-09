@@ -129,7 +129,7 @@ if __name__ == "__main__":
         # Use Nvidia's embeddings model
         embedding = NVIDIAEmbeddings(
             nvidia_api_key=os.getenv("NVIDIA_API_KEY"),
-            model="NV-Embed-QA")
+            model="nvidia/nv-embed-v1")
 
         # Connect to Couchbase Vector Store
         cluster = connect_to_couchbase(DB_CONN_STR, DB_USERNAME, DB_PASSWORD)

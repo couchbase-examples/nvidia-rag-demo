@@ -1,7 +1,7 @@
 import tempfile
 from langchain_couchbase import CouchbaseSearchVectorStore
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
 import streamlit as st
 from langchain_core.prompts import ChatPromptTemplate
@@ -22,11 +22,13 @@ def check_environment_variable(variable_name):
 def save_to_vector_store(uploaded_file, vector_store):
     """Chunk the PDF & store it in Couchbase Vector Store"""
     if uploaded_file is not None:
-        temp_dir = tempfile.TemporaryDirectory()
-        temp_file_path = os.path.join(temp_dir.name, uploaded_file.name)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_file_path = os.path.join(temp_dir, uploaded_file.name)
 
-        with open(temp_file_path, "wb") as f:
-            f.write(uploaded_file.getvalue())
+            with open(temp_file_path, "wb") as f:
+                f.write(uploaded_file.getvalue())
+
+            # Load only after the file is closed so the PDF is fully written
             loader = PyPDFLoader(temp_file_path)
             docs = loader.load()
 

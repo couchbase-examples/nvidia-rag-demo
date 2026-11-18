@@ -10,13 +10,40 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings, ChatNVIDIA
 
 
-def check_environment_variable(variable_name):
-    """Check if environment variable is set"""
-    if variable_name not in os.environ:
+# Every setting the app needs once the user is logged in. Add new settings here
+# so they are validated before any client is constructed.
+REQUIRED_ENV_VARS = (
+    "NVIDIA_API_KEY",
+    "DB_CONN_STR",
+    "DB_USERNAME",
+    "DB_PASSWORD",
+    "DB_BUCKET",
+    "DB_SCOPE",
+    "DB_COLLECTION",
+    "INDEX_NAME",
+)
+
+
+def find_missing_settings(names, environ=None):
+    """Return the names that are unset or empty, in the order given"""
+    environ = os.environ if environ is None else environ
+    return [name for name in names if not environ.get(name)]
+
+
+def load_settings(names):
+    """Return {name: value} for the given environment variables.
+
+    Shows one error listing every missing variable and stops the app if any
+    are unset or empty.
+    """
+    missing = find_missing_settings(names)
+    if missing:
         st.error(
-            f"{variable_name} environment variable is not set. Please add it to the secrets.toml file"
+            f"Missing environment variables: {', '.join(missing)}. "
+            "Please add them to the secrets.toml file"
         )
         st.stop()
+    return {name: os.environ[name] for name in names}
 
 
 def save_to_vector_store(uploaded_file, vector_store):
@@ -96,8 +123,7 @@ if __name__ == "__main__":
         menu_items=None,
     )
 
-    AUTH = os.getenv("LOGIN_PASSWORD")
-    check_environment_variable("LOGIN_PASSWORD")
+    AUTH = load_settings(["LOGIN_PASSWORD"])["LOGIN_PASSWORD"]
 
     # Authentication
     user_pwd = st.text_input("Enter password", type="password")
@@ -109,40 +135,26 @@ if __name__ == "__main__":
         st.error("Incorrect password")
 
     if st.session_state.auth:
-        # Load environment variables
-        DB_CONN_STR = os.getenv("DB_CONN_STR")
-        DB_USERNAME = os.getenv("DB_USERNAME")
-        DB_PASSWORD = os.getenv("DB_PASSWORD")
-        DB_BUCKET = os.getenv("DB_BUCKET")
-        DB_SCOPE = os.getenv("DB_SCOPE")
-        DB_COLLECTION = os.getenv("DB_COLLECTION")
-        INDEX_NAME = os.getenv("INDEX_NAME")
-
-        # Ensure that all environment variables are set
-        check_environment_variable("NVIDIA_API_KEY")
-        check_environment_variable("DB_CONN_STR")
-        check_environment_variable("DB_USERNAME")
-        check_environment_variable("DB_PASSWORD")
-        check_environment_variable("DB_BUCKET")
-        check_environment_variable("DB_SCOPE")
-        check_environment_variable("DB_COLLECTION")
-        check_environment_variable("INDEX_NAME")
+        # Load and validate all settings in one place
+        settings = load_settings(REQUIRED_ENV_VARS)
 
         # Use Nvidia's embeddings model
         embedding = NVIDIAEmbeddings(
-            nvidia_api_key=os.getenv("NVIDIA_API_KEY"),
+            nvidia_api_key=settings["NVIDIA_API_KEY"],
             model="nvidia/nv-embed-v1")
 
         # Connect to Couchbase Vector Store
-        cluster = connect_to_couchbase(DB_CONN_STR, DB_USERNAME, DB_PASSWORD)
+        cluster = connect_to_couchbase(
+            settings["DB_CONN_STR"], settings["DB_USERNAME"], settings["DB_PASSWORD"]
+        )
 
         vector_store = get_vector_store(
             cluster,
-            DB_BUCKET,
-            DB_SCOPE,
-            DB_COLLECTION,
+            settings["DB_BUCKET"],
+            settings["DB_SCOPE"],
+            settings["DB_COLLECTION"],
             embedding,
-            INDEX_NAME,
+            settings["INDEX_NAME"],
         )
 
         # Use couchbase vector store as a retriever for RAG
@@ -157,7 +169,11 @@ if __name__ == "__main__":
         prompt = ChatPromptTemplate.from_template(template)
 
         # Use Meta's LLama3 as the LLM for the RAG using NVIDIA NIM's API
-        llm = ChatNVIDIA(temperature=0, model="meta/llama3-70b-instruct")
+        llm = ChatNVIDIA(
+            nvidia_api_key=settings["NVIDIA_API_KEY"],
+            temperature=0,
+            model="meta/llama3-70b-instruct",
+        )
 
         # RAG chain
         chain = (

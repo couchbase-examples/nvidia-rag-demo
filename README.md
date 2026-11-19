@@ -133,3 +133,12 @@ For RAG, we are using Langchain, Couchbase Vector Search, NVidia NIM & Meta LLam
 - #### Run the application with streamlit
 
   `streamlit run chat_with_pdf.py`
+
+- #### Run the tests
+
+  The tests check that missing settings are reported before the app connects to anything. They need no Couchbase cluster or NVIDIA API key.
+
+  ```
+  pip install pytest
+  python -m pytest tests
+  ```
